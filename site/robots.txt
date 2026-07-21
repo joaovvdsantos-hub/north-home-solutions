@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# TODO before launch: replace with the real domain
+Sitemap: https://REPLACE-WITH-DOMAIN/sitemap.xml
