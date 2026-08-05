@@ -1149,7 +1149,7 @@ html:not(.js) .tile-video .play-badge { display: none; }
   max-height: min(64vh, 620px);
   object-fit: cover;
   /* favour the lower half so the mosaic pan reads as a shower, not a slab wall */
-  object-position: center 62%;
+  object-position: center center;
   display: block;
 }
 .hero-light .hero-visual::before {
