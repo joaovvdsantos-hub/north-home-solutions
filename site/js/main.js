@@ -77,7 +77,8 @@
       const f = btn.dataset.filter;
       let shown = 0;
       tiles.forEach(function (t) {
-        const show = f === "all" || t.dataset.cat === f;
+        /* a tile may belong to several categories: data-cat="kitchen flooring" */
+        const show = f === "all" || t.dataset.cat.split(" ").indexOf(f) !== -1;
         t.classList.toggle("hide", !show);
         if (show) shown++;
       });
@@ -211,9 +212,11 @@
   });
 
   /* ---------- Contact form ----------
-     TODO: wire to Formspree/Netlify Forms before launch. The mailto fallback
-     below opens the visitor's email client and says so honestly — it does NOT
-     claim the request was received. */
+     Paste the Formspree endpoint below (https://formspree.io/f/xxxxxxxx) and the
+     form posts for real. While it is empty the mailto fallback runs instead —
+     that fallback only opens the visitor's mail app and says so honestly, it
+     never claims the request was received. */
+  const FORM_ENDPOINT = "";
   const form = document.getElementById("quote-form");
   if (form) {
     form.addEventListener("submit", function (e) {
@@ -234,6 +237,32 @@
         if (!phone) form.querySelector("#f-phone").setAttribute("aria-invalid", "true");
         err.textContent = "Please fill in your name and phone number.";
         firstInvalid.focus();
+        return;
+      }
+      if (FORM_ENDPOINT) {
+        const btn = form.querySelector('[type="submit"]');
+        const label = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+        fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: data,
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error(r.status);
+            form.reset();
+            msg.textContent = "Thanks — we got your request and will be in touch shortly.";
+            msg.classList.add("show");
+          })
+          .catch(function () {
+            err.textContent =
+              "Something went wrong sending your request. Please call or text us at (774) 420-6728.";
+          })
+          .then(function () {
+            btn.disabled = false;
+            btn.textContent = label;
+          });
         return;
       }
       const lines = [
