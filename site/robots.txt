@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Trocar pelo domínio final quando o cliente registrar (northhomesolutions.com)
-Sitemap: https://north-home-solutions.pages.dev/sitemap.xml
+Sitemap: https://northhomesolutions.com/sitemap.xml
