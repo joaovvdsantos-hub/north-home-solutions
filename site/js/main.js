@@ -212,11 +212,11 @@
   });
 
   /* ---------- Contact form ----------
-     Paste the Formspree endpoint below (https://formspree.io/f/xxxxxxxx) and the
-     form posts for real. While it is empty the mailto fallback runs instead —
-     that fallback only opens the visitor's mail app and says so honestly, it
-     never claims the request was received. */
-  const FORM_ENDPOINT = "";
+     Posta para /api/lead (mesma origem, sem CORS). Essa função repassa para o
+     GHL usando a URL guardada como segredo no Cloudflare — o repositório é
+     público, então o webhook não pode viver aqui.
+     Enquanto o segredo não estiver configurado a função responde 503 e o
+     visitante vê o telefone: nunca dizemos "recebemos" sem ter recebido. */
   const form = document.getElementById("quote-form");
   if (form) {
     form.addEventListener("submit", function (e) {
@@ -239,46 +239,37 @@
         firstInvalid.focus();
         return;
       }
-      if (FORM_ENDPOINT) {
-        const btn = form.querySelector('[type="submit"]');
-        const label = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = "Sending…";
-        fetch(FORM_ENDPOINT, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: data,
+      const btn = form.querySelector('[type="submit"]');
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+      fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          email: (data.get("email") || "").toString(),
+          service: (data.get("service") || "").toString(),
+          message: (data.get("message") || "").toString(),
+          company: (data.get("company") || "").toString(), /* honeypot */
+          page: location.href,
+        }),
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          form.reset();
+          msg.textContent = "Thanks — we got your request and will be in touch shortly.";
+          msg.classList.add("show");
         })
-          .then(function (r) {
-            if (!r.ok) throw new Error(r.status);
-            form.reset();
-            msg.textContent = "Thanks — we got your request and will be in touch shortly.";
-            msg.classList.add("show");
-          })
-          .catch(function () {
-            err.textContent =
-              "Something went wrong sending your request. Please call or text us at (774) 420-6728.";
-          })
-          .then(function () {
-            btn.disabled = false;
-            btn.textContent = label;
-          });
-        return;
-      }
-      const lines = [
-        "Name: " + name,
-        "Phone: " + phone,
-        "Email: " + (data.get("email") || ""),
-        "Service: " + (data.get("service") || ""),
-        "Message: " + (data.get("message") || ""),
-      ];
-      const body = lines.map(encodeURIComponent).join("%0D%0A");
-      window.location.href =
-        "mailto:contact@northhomesolutions.com?subject=" +
-        encodeURIComponent("Estimate request — " + name) +
-        "&body=" + body;
-      msg.textContent = "Your email app should open with your request. If it doesn't, call or text us directly.";
-      msg.classList.add("show");
+        .catch(function () {
+          err.textContent =
+            "We could not send your request. Please call or text us at (774) 420-6728.";
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = label;
+        });
     });
   }
 
