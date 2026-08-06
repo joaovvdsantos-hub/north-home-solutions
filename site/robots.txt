@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-# TODO before launch: replace with the real domain
-Sitemap: https://REPLACE-WITH-DOMAIN/sitemap.xml
+# Trocar pelo domínio final quando o cliente registrar (northhomesolutions.com)
+Sitemap: https://north-home-solutions.pages.dev/sitemap.xml

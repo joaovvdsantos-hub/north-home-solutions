@@ -1,0 +1,24 @@
+# Cloudflare Pages — regras de cache
+# O HTML tem de ser sempre fresco: é ele que aponta para ?v=N do CSS/JS.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# CSS e JS são versionados via ?v=N na tag — pode cachear forte.
+/css/*
+  Cache-Control: public, max-age=31536000
+/js/*
+  Cache-Control: public, max-age=31536000
+
+# Imagens e vídeos mantêm o mesmo nome quando o gen_assets.py os regenera, então
+# um TTL longo prenderia versão velha no navegador. 1 dia cobre a visita vinda do
+# anúncio e continua seguro para iterar.
+/assets/*
+  Cache-Control: public, max-age=86400
+
+# Segurança básica
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
